@@ -55,6 +55,19 @@ namespace Spotquickly.Controllers
             var response = await httpClient.SendAsync(request);
             var json = await response.Content.ReadAsStringAsync();
             return Content(json, "application/json");
+
         }
+        [HttpGet("me")]
+        public async Task<IActionResult> GetSpotifyProfile([FromQuery] string token)
+        {
+            var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await httpClient.GetAsync("https://api.spotify.com/v1/me");
+            var content = await response.Content.ReadAsStringAsync();
+
+            return Content(content, "application/json");
+        }
+
     }
 }
