@@ -63,7 +63,7 @@
         // Función para obtener el token desde la URL
         function getAccessTokenFromUrl() {
             const params = new URLSearchParams(window.location.search);
-            return params.get("access_token"); // o simplemente "token" si lo mandás así
+            return params.get("token"); // Cambio a 'token' en lugar de 'access_token'
         }
 
         const token = getAccessTokenFromUrl();

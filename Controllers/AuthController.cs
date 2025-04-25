@@ -61,7 +61,8 @@ namespace Spotquickly.Controllers
             var accessToken = tokenResponse["access_token"];
 
             // Redirigir al frontend con el token
-            return Redirect($"https://spotquickly.onrender.com/callback.html?token={accessToken}");
+            return Redirect($"https://spotquickly.onrender.com/?token={accessToken}");
+
         }
 
         [HttpGet("me")]
