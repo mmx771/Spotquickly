@@ -1,0 +1,69 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Spotquickly - Top Tracks</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #121212;
+            color: white;
+            text-align: center;
+            padding: 40px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background-color: #1DB954;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            color: white;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mis Top Canciones de Spotify 🎧</h1>
+    <button onclick="login()">Iniciar con Spotify</button>
+    <ul id="trackList"></ul>
+
+    <script>
+        function login() {
+            window.location.href = "/api/auth/login";
+        }
+
+        // Si hay ?code= en la URL, entonces hacer fetch a /api/auth/callback y luego top-tracks
+        window.onload = async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+
+            if (code) {
+                const callbackRes = await fetch(`/api/auth/callback?code=${code}`);
+                const data = await callbackRes.json();
+                const token = data.access_token;
+
+                const tracksRes = await fetch(`/api/auth/top-tracks?token=${token}`);
+                const tracks = await tracksRes.json();
+
+                const list = document.getElementById("trackList");
+                tracks.items.forEach(t => {
+                    const li = document.createElement("li");
+                    li.innerText = `${t.name} - ${t.artists.map(a => a.name).join(", ")}`;
+                    list.appendChild(li);
+                });
+            }
+        };
+    </script>
+</body>
+</html>

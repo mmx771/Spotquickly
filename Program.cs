@@ -8,6 +8,7 @@ var app = builder.Build();
 
 // IMPORTANTE: Habilita el routing ANTES del mapeo de controladores
 app.UseRouting();
+app.UseStaticFiles();
 app.UseAuthorization();
 
 // Mapea los controladores con su routing
