@@ -1,0 +1,11 @@
+C:\Users\Mauro Cosentino\source\repos\Spotquickly\out\Spotquickly.exe
+C:\Users\Mauro Cosentino\source\repos\Spotquickly\out\appsettings.Development.json
+C:\Users\Mauro Cosentino\source\repos\Spotquickly\out\appsettings.json
+C:\Users\Mauro Cosentino\source\repos\Spotquickly\out\Spotquickly.dll
+C:\Users\Mauro Cosentino\source\repos\Spotquickly\out\Spotquickly.deps.json
+C:\Users\Mauro Cosentino\source\repos\Spotquickly\out\Spotquickly.runtimeconfig.json
+C:\Users\Mauro Cosentino\source\repos\Spotquickly\out\Spotquickly.pdb
+C:\Users\Mauro Cosentino\source\repos\Spotquickly\out\Microsoft.OpenApi.dll
+C:\Users\Mauro Cosentino\source\repos\Spotquickly\out\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\Mauro Cosentino\source\repos\Spotquickly\out\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\Mauro Cosentino\source\repos\Spotquickly\out\Swashbuckle.AspNetCore.SwaggerUI.dll
