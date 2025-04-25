@@ -48,16 +48,22 @@ namespace Spotquickly.Controllers
             var request = new HttpRequestMessage(HttpMethod.Post, "https://accounts.spotify.com/api/token");
             request.Content = new FormUrlEncodedContent(new[]
             {
-                new KeyValuePair<string, string>("grant_type", "authorization_code"),
-                new KeyValuePair<string, string>("code", code),
-                new KeyValuePair<string, string>("redirect_uri", redirectUri)
-            });
+        new KeyValuePair<string, string>("grant_type", "authorization_code"),
+        new KeyValuePair<string, string>("code", code),
+        new KeyValuePair<string, string>("redirect_uri", redirectUri)
+    });
 
             var response = await httpClient.SendAsync(request);
             var json = await response.Content.ReadAsStringAsync();
-            return Content(json, "application/json");
 
+            // Extraer el token de la respuesta de Spotify
+            var tokenResponse = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+            var accessToken = tokenResponse["access_token"];
+
+            // Redirigir al frontend con el token
+            return Redirect($"https://spotquickly.onrender.com/callback.html?token={accessToken}");
         }
+
         [HttpGet("me")]
         public async Task<IActionResult> GetSpotifyProfile([FromQuery] string token)
         {
@@ -76,21 +82,22 @@ namespace Spotquickly.Controllers
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var response = await httpClient.GetAsync("https://api.spotify.com/v1/me/top/tracks?limit=10");
-
-            // Verificamos si la respuesta es exitosa
-            if (!response.IsSuccessStatusCode)
-            {
-                return BadRequest("Error al obtener las canciones más escuchadas.");
-            }
-
             var content = await response.Content.ReadAsStringAsync();
 
-            // Convertir el contenido a un objeto JSON
-            var topTracks = JsonConvert.DeserializeObject(content);
+            if (!response.IsSuccessStatusCode)
+            {
+                return BadRequest(new
+                {
+                    message = "Error al obtener las canciones más escuchadas.",
+                    statusCode = (int)response.StatusCode,
+                    errorDetail = content
+                });
+            }
 
-            // Devolver como JSON con formato estructurado
+            var topTracks = JsonConvert.DeserializeObject(content);
             return Ok(topTracks);
         }
+
 
 
     }

@@ -2,68 +2,97 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Spotquickly - Top Tracks</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotquickly - Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #121212;
-            color: white;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+
+        h1 {
             text-align: center;
-            padding: 40px;
+            color: #1DB954;
         }
 
         button {
-            padding: 12px 24px;
-            font-size: 16px;
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
             background-color: #1DB954;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
             color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
         }
 
+            button:hover {
+                background-color: #1ed760;
+            }
+
         ul {
-            list-style: none;
+            list-style-type: none;
             padding: 0;
         }
 
         li {
+            background-color: #fff;
             margin: 10px 0;
-            font-size: 18px;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .track-info {
+            display: flex;
+            justify-content: space-between;
         }
     </style>
 </head>
 <body>
-    <h1>Mis Top Canciones de Spotify 🎧</h1>
-    <button onclick="login()">Iniciar con Spotify</button>
-    <ul id="trackList"></ul>
+    <h1>Spotquickly - Top Tracks</h1>
+
+    <!-- Aquí va el botón de login de Spotify -->
+    <button onclick="window.location.href='/api/auth/login'">Iniciar con Spotify</button>
+
+    <h2>Canciones más escuchadas</h2>
+    <ul id="track-list"></ul>
 
     <script>
-        function login() {
-            window.location.href = "/api/auth/login";
+        // Función para obtener el token desde la URL
+        function getAccessTokenFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get("access_token"); // o simplemente "token" si lo mandás así
         }
 
-        // Si hay ?code= en la URL, entonces hacer fetch a /api/auth/callback y luego top-tracks
-        window.onload = async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
+        const token = getAccessTokenFromUrl();
 
-            if (code) {
-                const callbackRes = await fetch(`/api/auth/callback?code=${code}`);
-                const data = await callbackRes.json();
-                const token = data.access_token;
-
-                const tracksRes = await fetch(`/api/auth/top-tracks?token=${token}`);
-                const tracks = await tracksRes.json();
-
-                const list = document.getElementById("trackList");
-                tracks.items.forEach(t => {
-                    const li = document.createElement("li");
-                    li.innerText = `${t.name} - ${t.artists.map(a => a.name).join(", ")}`;
-                    list.appendChild(li);
+        if (token) {
+            fetch(`https://spotquickly.onrender.com/api/auth/top-tracks?token=${token}`)
+                .then(response => response.json())
+                .then(data => {
+                    const list = document.getElementById("track-list");
+                    if (data.items && data.items.length > 0) {
+                        data.items.forEach(track => {
+                            const li = document.createElement("li");
+                            li.classList.add("track-info");
+                            li.innerHTML = `
+                                    <span>${track.name} - ${track.artists[0].name}</span>
+                                    <a href="${track.album.external_urls.spotify}" target="_blank">Ver en Spotify</a>
+                                `;
+                            list.appendChild(li);
+                        });
+                    } else {
+                        const li = document.createElement("li");
+                        li.textContent = "No se encontraron canciones.";
+                        list.appendChild(li);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error obteniendo canciones:", error);
                 });
-            }
-        };
+        }
     </script>
 </body>
 </html>
