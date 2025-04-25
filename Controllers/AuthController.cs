@@ -86,6 +86,9 @@ namespace Spotquickly.Controllers
             var response = await httpClient.GetAsync("https://api.spotify.com/v1/me/top/tracks?limit=10");
             var content = await response.Content.ReadAsStringAsync();
 
+            // Agregar log para ver la respuesta cruda de Spotify
+            Console.WriteLine($"Spotify Response: {content}");
+
             if (!response.IsSuccessStatusCode)
             {
                 return BadRequest(new
@@ -96,11 +99,18 @@ namespace Spotquickly.Controllers
                 });
             }
 
-            // Deserializar la respuesta de Spotify a un objeto tipado
+            // Deserializar la respuesta de Spotify
             var topTracksResponse = JsonConvert.DeserializeObject<TopTracksResponse>(content);
+
+            // Verificar si hay canciones en la respuesta
+            if (topTracksResponse?.Items == null || topTracksResponse.Items.Count == 0)
+            {
+                return NotFound("No se encontraron canciones.");
+            }
 
             return Ok(topTracksResponse.Items);
         }
+
     }
 
     // Clase para mapear la respuesta de los top tracks de Spotify
