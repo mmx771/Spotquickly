@@ -63,7 +63,7 @@
         // Función para obtener el token desde la URL
         function getAccessTokenFromUrl() {
             const params = new URLSearchParams(window.location.search);
-            return params.get("token"); // Cambio a 'token' en lugar de 'access_token'
+            return params.get("token"); // Recupera el token de la URL
         }
 
         const token = getAccessTokenFromUrl();
@@ -73,14 +73,14 @@
                 .then(response => response.json())
                 .then(data => {
                     const list = document.getElementById("track-list");
-                    if (data.items && data.items.length > 0) {
-                        data.items.forEach(track => {
+                    if (data && data.length > 0) {
+                        data.forEach(track => {
                             const li = document.createElement("li");
                             li.classList.add("track-info");
                             li.innerHTML = `
-                                    <span>${track.name} - ${track.artists[0].name}</span>
-                                    <a href="${track.album.external_urls.spotify}" target="_blank">Ver en Spotify</a>
-                                `;
+                                        <span>${track.name} - ${track.artists[0].name}</span>
+                                        <a href="${track.album.external_urls.spotify}" target="_blank">Ver en Spotify</a>
+                                    `;
                             list.appendChild(li);
                         });
                     } else {
@@ -92,6 +92,11 @@
                 .catch(error => {
                     console.error("Error obteniendo canciones:", error);
                 });
+        } else {
+            const list = document.getElementById("track-list");
+            const li = document.createElement("li");
+            li.textContent = "Inicia sesión con Spotify para ver tus canciones más escuchadas.";
+            list.appendChild(li);
         }
     </script>
 </body>

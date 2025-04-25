@@ -2,7 +2,8 @@
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Text.Json;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Spotquickly.Controllers
 {
@@ -48,10 +49,10 @@ namespace Spotquickly.Controllers
             var request = new HttpRequestMessage(HttpMethod.Post, "https://accounts.spotify.com/api/token");
             request.Content = new FormUrlEncodedContent(new[]
             {
-        new KeyValuePair<string, string>("grant_type", "authorization_code"),
-        new KeyValuePair<string, string>("code", code),
-        new KeyValuePair<string, string>("redirect_uri", redirectUri)
-    });
+                new KeyValuePair<string, string>("grant_type", "authorization_code"),
+                new KeyValuePair<string, string>("code", code),
+                new KeyValuePair<string, string>("redirect_uri", redirectUri)
+            });
 
             var response = await httpClient.SendAsync(request);
             var json = await response.Content.ReadAsStringAsync();
@@ -62,7 +63,6 @@ namespace Spotquickly.Controllers
 
             // Redirigir al frontend con el token
             return Redirect($"https://spotquickly.onrender.com/?token={accessToken}");
-
         }
 
         [HttpGet("me")]
@@ -76,6 +76,7 @@ namespace Spotquickly.Controllers
 
             return Content(content, "application/json");
         }
+
         [HttpGet("top-tracks")]
         public async Task<IActionResult> GetTopTracks([FromQuery] string token)
         {
@@ -95,11 +96,54 @@ namespace Spotquickly.Controllers
                 });
             }
 
-            var topTracks = JsonConvert.DeserializeObject(content);
-            return Ok(topTracks);
+            // Deserializar la respuesta de Spotify a un objeto tipado
+            var topTracksResponse = JsonConvert.DeserializeObject<TopTracksResponse>(content);
+
+            return Ok(topTracksResponse.Items);
         }
+    }
 
+    // Clase para mapear la respuesta de los top tracks de Spotify
+    public class TopTracksResponse
+    {
+        [JsonProperty("items")]
+        public List<Track> Items { get; set; }
+    }
 
+    // Clase para representar cada canción
+    public class Track
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
 
+        [JsonProperty("artists")]
+        public List<Artist> Artists { get; set; }
+
+        [JsonProperty("album")]
+        public Album Album { get; set; }
+    }
+
+    // Clase para representar el artista
+    public class Artist
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("external_urls")]
+        public ExternalUrls ExternalUrls { get; set; }
+    }
+
+    // Clase para representar la URL externa (Spotify)
+    public class ExternalUrls
+    {
+        [JsonProperty("spotify")]
+        public string Spotify { get; set; }
+    }
+
+    // Clase para representar el álbum
+    public class Album
+    {
+        [JsonProperty("external_urls")]
+        public ExternalUrls ExternalUrls { get; set; }
     }
 }
