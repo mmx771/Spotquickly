@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -75,9 +76,20 @@ namespace Spotquickly.Controllers
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var response = await httpClient.GetAsync("https://api.spotify.com/v1/me/top/tracks?limit=10");
+
+            // Verificamos si la respuesta es exitosa
+            if (!response.IsSuccessStatusCode)
+            {
+                return BadRequest("Error al obtener las canciones más escuchadas.");
+            }
+
             var content = await response.Content.ReadAsStringAsync();
 
-            return Content(content, "application/json");
+            // Convertir el contenido a un objeto JSON
+            var topTracks = JsonConvert.DeserializeObject(content);
+
+            // Devolver como JSON con formato estructurado
+            return Ok(topTracks);
         }
 
 

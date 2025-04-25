@@ -41,3 +41,4 @@ C:\Users\Mauro Cosentino\source\repos\Spotquickly\Spotquickly\bin\Debug\net8.0\o
 C:\Users\Mauro Cosentino\source\repos\Spotquickly\Spotquickly\bin\Debug\net8.0\out\Spotquickly.runtimeconfig.json
 C:\Users\Mauro Cosentino\source\repos\Spotquickly\Spotquickly\bin\Debug\net8.0\out\Spotquickly.staticwebassets.endpoints.json
 C:\Users\Mauro Cosentino\source\repos\Spotquickly\Spotquickly\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+C:\Users\Mauro Cosentino\source\repos\Spotquickly\Spotquickly\bin\Debug\net8.0\Newtonsoft.Json.dll

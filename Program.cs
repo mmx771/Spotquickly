@@ -1,27 +1,23 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Agregar servicios si los tenés
+// Servicios necesarios
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-
-// Desactivar redirección HTTPS en Render
-builder.Services.Configure<HostOptions>(options =>
-{
-    options.ShutdownTimeout = TimeSpan.FromSeconds(10);
-});
+builder.Services.AddEndpointsApiExplorer(); // Esto sí es útil aunque no uses Swagger
 
 var app = builder.Build();
 
-// Eliminar cualquier intento de redirección HTTPS
-// app.UseHttpsRedirection();  <-- Esta línea debe estar comentada o eliminada
-
+// IMPORTANTE: Habilita el routing ANTES del mapeo de controladores
+app.UseRouting();
 app.UseAuthorization();
 
-app.MapControllers();
+// Mapea los controladores con su routing
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
 
-// Configurar el puerto dinámico de Render (esto es importante)
+// Configurar el puerto dinámico de Render
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
 app.Urls.Add($"http://*:{port}");
 
 app.Run();
-
