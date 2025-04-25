@@ -68,6 +68,18 @@ namespace Spotquickly.Controllers
 
             return Content(content, "application/json");
         }
+        [HttpGet("top-tracks")]
+        public async Task<IActionResult> GetTopTracks([FromQuery] string token)
+        {
+            var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await httpClient.GetAsync("https://api.spotify.com/v1/me/top/tracks?limit=10");
+            var content = await response.Content.ReadAsStringAsync();
+
+            return Content(content, "application/json");
+        }
+
 
     }
 }
