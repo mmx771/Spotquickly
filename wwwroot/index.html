@@ -53,51 +53,78 @@
 <body>
     <h1>Spotquickly - Top Tracks</h1>
 
-    <!-- Aquí va el botón de login de Spotify -->
+    <!-- Botón de login de Spotify -->
     <button onclick="window.location.href='/api/auth/login'">Iniciar con Spotify</button>
 
     <h2>Canciones más escuchadas</h2>
     <ul id="track-list"></ul>
 
     <script>
-        // Función para obtener el token desde la URL
-        function getAccessTokenFromUrl() {
+        // Guardar tokens si vienen en la URL
+        function saveTokensFromUrl() {
             const params = new URLSearchParams(window.location.search);
-            return params.get("token"); // Recupera el token de la URL
+            const token = params.get("token");
+            const refreshToken = params.get("refresh_token");
+
+            if (token) localStorage.setItem("access_token", token);
+            if (refreshToken) localStorage.setItem("refresh_token", refreshToken);
+
+            // Limpiar la URL
+            if (token || refreshToken) {
+                window.history.replaceState({}, document.title, "/");
+            }
         }
 
-        const token = getAccessTokenFromUrl();
+        async function fetchTopTracks() {
+            let token = localStorage.getItem("access_token");
+            const refreshToken = localStorage.getItem("refresh_token");
 
-        if (token) {
-            fetch(`https://spotquickly.onrender.com/api/auth/top-tracks?token=${token}`)
-                .then(response => response.json())
-                .then(data => {
-                    const list = document.getElementById("track-list");
-                    if (data && data.length > 0) {
-                        data.forEach(track => {
-                            const li = document.createElement("li");
-                            li.classList.add("track-info");
-                            li.innerHTML = `
-                                        <span>${track.name} - ${track.artists[0].name}</span>
-                                        <a href="${track.album.external_urls.spotify}" target="_blank">Ver en Spotify</a>
-                                    `;
-                            list.appendChild(li);
-                        });
-                    } else {
-                        const li = document.createElement("li");
-                        li.textContent = "No se encontraron canciones.";
-                        list.appendChild(li);
-                    }
-                })
-                .catch(error => {
-                    console.error("Error obteniendo canciones:", error);
+            let response = await fetch(`https://spotquickly.onrender.com/api/auth/top-tracks?token=${token}`);
+
+            // Si el token expiró, intentar renovarlo
+            if (response.status === 401 || response.status === 400) {
+                console.log("Token expirado. Intentando renovarlo...");
+
+                const refreshResponse = await fetch(`https://spotquickly.onrender.com/api/auth/refresh-token?refreshToken=${refreshToken}`, {
+                    method: "POST"
                 });
-        } else {
+
+                if (refreshResponse.ok) {
+                    const data = await refreshResponse.json();
+                    token = data.access_token;
+                    localStorage.setItem("access_token", token);
+
+                    // Reintentar obtener los tracks
+                    response = await fetch(`https://spotquickly.onrender.com/api/auth/top-tracks?token=${token}`);
+                } else {
+                    alert("Tu sesión expiró. Iniciá sesión nuevamente.");
+                    return;
+                }
+            }
+
+            const data = await response.json();
             const list = document.getElementById("track-list");
-            const li = document.createElement("li");
-            li.textContent = "Inicia sesión con Spotify para ver tus canciones más escuchadas.";
-            list.appendChild(li);
+            list.innerHTML = "";
+
+            if (data && data.length > 0) {
+                data.forEach(track => {
+                    const li = document.createElement("li");
+                    li.classList.add("track-info");
+                    li.innerHTML = `
+                            <span>${track.name} - ${track.artists[0].name}</span>
+                            <a href="${track.album.external_urls.spotify}" target="_blank">Ver en Spotify</a>
+                        `;
+                    list.appendChild(li);
+                });
+            } else {
+                const li = document.createElement("li");
+                li.textContent = "No se encontraron canciones.";
+                list.appendChild(li);
+            }
         }
+
+        saveTokensFromUrl();
+        fetchTopTracks();
     </script>
 </body>
 </html>

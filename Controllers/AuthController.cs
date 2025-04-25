@@ -59,10 +59,15 @@ namespace Spotquickly.Controllers
 
             // Extraer el token de la respuesta de Spotify
             var tokenResponse = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+            //var accessToken = tokenResponse["access_token"];
             var accessToken = tokenResponse["access_token"];
+            var refreshToken = tokenResponse.ContainsKey("refresh_token") ? tokenResponse["refresh_token"] : "";
+
+            return Redirect($"https://spotquickly.onrender.com/?token={accessToken}&refresh_token={refreshToken}");
+
 
             // Redirigir al frontend con el token
-            return Redirect($"https://spotquickly.onrender.com/?token={accessToken}");
+            //return Redirect($"https://spotquickly.onrender.com/?token={accessToken}");
         }
 
         [HttpGet("me")]
@@ -83,7 +88,8 @@ namespace Spotquickly.Controllers
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await httpClient.GetAsync("https://api.spotify.com/v1/me/top/tracks?limit=10");
+            var response = await httpClient.GetAsync("https://api.spotify.com/v1/me/top/tracks?limit=50");
+
             var content = await response.Content.ReadAsStringAsync();
 
             // Agregar log para ver la respuesta cruda de Spotify
@@ -110,6 +116,47 @@ namespace Spotquickly.Controllers
 
             return Ok(topTracksResponse.Items);
         }
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromQuery] string refreshToken)
+        {
+            if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
+            {
+                return StatusCode(500, "Spotify client credentials are not configured.");
+            }
+
+            try
+            {
+                var httpClient = new HttpClient();
+                var authHeader = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}"));
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authHeader);
+
+                var request = new HttpRequestMessage(HttpMethod.Post, "https://accounts.spotify.com/api/token");
+                request.Content = new FormUrlEncodedContent(new[]
+                {
+            new KeyValuePair<string, string>("grant_type", "refresh_token"),
+            new KeyValuePair<string, string>("refresh_token", refreshToken)
+        });
+
+                var response = await httpClient.SendAsync(request);
+                var json = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return BadRequest(new { message = "Error al renovar el token de acceso", errorDetail = json });
+                }
+
+                var tokenResponse = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+                var newAccessToken = tokenResponse["access_token"];
+
+                return Ok(new { access_token = newAccessToken });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error inesperado al renovar el token", error = ex.Message });
+            }
+        }
+
+
 
     }
 
