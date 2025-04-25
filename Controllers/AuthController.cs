@@ -9,13 +9,19 @@ namespace Spotquickly.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly string clientId = "TU_CLIENT_ID";
-        private readonly string clientSecret = "TU_CLIENT_SECRET";
-        private readonly string redirectUri = "https://spotquicky.azurewebsites.net/api/auth/callback";
+        private readonly string clientId = Environment.GetEnvironmentVariable("SPOTIFY_CLIENT_ID");
+        private readonly string clientSecret = Environment.GetEnvironmentVariable("SPOTIFY_CLIENT_SECRET");
+        private readonly string redirectUri = Environment.GetEnvironmentVariable("SPOTIFY_REDIRECT_URI");
 
         [HttpGet("login")]
         public IActionResult Login()
         {
+            // Validación por si faltan variables de entorno
+            if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
+            {
+                return StatusCode(500, "Spotify client credentials are not configured.");
+            }
+
             var scopes = "user-read-email user-top-read";
             var spotifyUrl = $"https://accounts.spotify.com/authorize?response_type=code&client_id={clientId}&scope={Uri.EscapeDataString(scopes)}&redirect_uri={Uri.EscapeDataString(redirectUri)}";
             return Redirect(spotifyUrl);
@@ -24,6 +30,15 @@ namespace Spotquickly.Controllers
         [HttpGet("callback")]
         public async Task<IActionResult> Callback([FromQuery] string code)
         {
+            if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
+            {
+                return StatusCode(500, "Spotify client credentials are not configured.");
+            }
+            if (string.IsNullOrEmpty(code))
+            {
+                return BadRequest("Code parameter is missing");
+            }
+
             var httpClient = new HttpClient();
             var authHeader = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}"));
 

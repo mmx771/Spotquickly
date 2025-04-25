@@ -1,21 +1,24 @@
-# Etapa de build
+# Imagen base para compilar el proyecto
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-# Copia y restaura dependencias
+# Copiar archivos del proyecto
 COPY *.csproj ./
 RUN dotnet restore
 
-# Copia el resto del código
+# Copiar el resto del código y compilar
 COPY . ./
-
-# Compila en modo Release
 RUN dotnet publish -c Release -o out
 
-# Etapa de runtime
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+# Imagen final (runtime)
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
-COPY --from=build /app/out ./
 
-# Cambiá Spotquickly.dll si el nombre es distinto
+COPY --from=build /app/out .
+
+# Expone el puerto para Render (aunque Render lo detecta solo)
+EXPOSE 80
+
+# Ejecutar la app
 ENTRYPOINT ["dotnet", "Spotquickly.dll"]
+
