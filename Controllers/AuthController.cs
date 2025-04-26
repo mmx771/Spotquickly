@@ -24,7 +24,7 @@ namespace Spotquickly.Controllers
                 return StatusCode(500, "Spotify client credentials are not configured.");
             }
 
-            var scopes = "user-read-email user-top-read";
+            var scopes = "user-top-read playlist-read-private playlist-read-collaborative";
             var spotifyUrl = $"https://accounts.spotify.com/authorize?response_type=code&client_id={clientId}&scope={Uri.EscapeDataString(scopes)}&redirect_uri={Uri.EscapeDataString(redirectUri)}";
             return Redirect(spotifyUrl);
         }
