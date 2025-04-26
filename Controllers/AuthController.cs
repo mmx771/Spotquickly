@@ -79,8 +79,21 @@ namespace Spotquickly.Controllers
             var response = await httpClient.GetAsync("https://api.spotify.com/v1/me");
             var content = await response.Content.ReadAsStringAsync();
 
-            return Content(content, "application/json");
+            if (!response.IsSuccessStatusCode)
+            {
+                return BadRequest(new { message = "Error al obtener el perfil", detail = content });
+            }
+
+            dynamic profile = JsonConvert.DeserializeObject(content);
+
+            return Ok(new
+            {
+                name = (string)profile.display_name,
+                email = (string)profile.email,
+                image = profile.images.Count > 0 ? (string)profile.images[0].url : null
+            });
         }
+
 
         [HttpGet("top-tracks")]
         public async Task<IActionResult> GetTopTracks([FromQuery] string token)
@@ -155,6 +168,50 @@ namespace Spotquickly.Controllers
                 return StatusCode(500, new { message = "Error inesperado al renovar el token", error = ex.Message });
             }
         }
+        [HttpGet("playlists")]
+        public async Task<IActionResult> GetUserPlaylists([FromQuery] string token)
+        {
+            var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await httpClient.GetAsync("https://api.spotify.com/v1/me/playlists");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return BadRequest(new
+                {
+                    message = "Error al obtener las playlists.",
+                    statusCode = (int)response.StatusCode,
+                    errorDetail = content
+                });
+            }
+
+            return Content(content, "application/json");
+        }
+        [HttpGet("playlist-tracks")]
+        public async Task<IActionResult> GetPlaylistTracks([FromQuery] string token, [FromQuery] string playlistId)
+        {
+            var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await httpClient.GetAsync($"https://api.spotify.com/v1/playlists/{playlistId}/tracks");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return BadRequest(new
+                {
+                    message = "Error al obtener canciones de la playlist.",
+                    statusCode = (int)response.StatusCode,
+                    errorDetail = content
+                });
+            }
+
+            return Content(content, "application/json");
+        }
+
+
 
 
 

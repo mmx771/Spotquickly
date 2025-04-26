@@ -13,10 +13,12 @@ app.UseStaticFiles();
 app.UseAuthorization();
 
 // Mapea los controladores con su routing
-app.UseEndpoints(endpoints =>
+app.MapGet("/", async context =>
 {
-    endpoints.MapControllers();
+    context.Response.ContentType = "text/html";
+    await context.Response.SendFileAsync("wwwroot/index.html");
 });
+
 
 // Configurar el puerto dinámico de Render
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Spotquickly")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9f5de01d18ce1f711ef2667db03c1fe518d74ee8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b1e93ae488ef1099feb5aef6572365c5d5918caa")]
 [assembly: System.Reflection.AssemblyProductAttribute("Spotquickly")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Spotquickly")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
