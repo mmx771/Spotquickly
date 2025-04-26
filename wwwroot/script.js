@@ -10,9 +10,9 @@ const { token, refreshToken } = getAccessTokenFromUrl();
 
 if (token) {
     // Top Tracks
-    fetch(`/api/auth/top-tracks?token=${token}`)
-        .then(res => res.json())
-        .then(data => {
+    fetch(`https://spotquickly.onrender.com/api/auth/top-tracks?token=${token}`)
+    .then(res => res.json())
+    .then(data => {
             const list = document.getElementById("track-list");
             if (data && data.length > 0) {
                 data.forEach(track => {
@@ -32,9 +32,9 @@ if (token) {
         });
 
     // Playlists
-    fetch(`/api/auth/playlists?token=${token}`)
-        .then(res => res.json())
-        .then(data => {
+    fetch(`https://spotquickly.onrender.com/api/auth/playlists?token=${token}`)
+    .then(res => res.json())
+    .then(data => {
             const playlistList = document.getElementById("playlist-list");
             data.forEach(playlist => {
                 const li = document.createElement("li");
@@ -60,9 +60,9 @@ function loadPlaylistTracks(playlistId, playlistName) {
     document.getElementById("playlist-title").textContent = `Canciones de: ${playlistName}`;
     document.getElementById("playlist-title").style.display = "block";
 
-    fetch(`/api/auth/playlist-tracks?token=${token}&playlistId=${playlistId}`)
-        .then(res => res.json())
-        .then(data => {
+    fetch(`https://spotquickly.onrender.com/api/auth/playlist-tracks?token=${token}&playlistId=${playlistId}`)
+    .then(res => res.json())
+    .then(data => {
             const list = document.getElementById("playlist-tracks");
             list.innerHTML = "";
             if (data && data.length > 0) {
